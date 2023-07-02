@@ -1,26 +1,38 @@
-// import * as modules from '../../../src/app/modules/cloak'
+import { CloakModule } from "../../../../src/app/modules/cloak/module";
+import { defaultConfig } from "../../../../src/app/modules/cloak/constants";
 
-describe('CloakModule', () => {
-	describe('constructor', () => {
-		it.todo('should have valid name');
-	});
+describe("CloakModule", () => {
+    let cloakModule!: CloakModule;
+    let genesisConfig: any;
+    let moduleConfig: any;
+    let endpointConfig: any;
 
-	describe('beforeTransactionsExecute', () => {
-		it.todo('should execute before block execute');
-	});
-	describe('afterTransactionsExecute', () => {
-		it.todo('should execute after block execute');
-	});
-	describe('beforeCommandExecute', () => {
-		it.todo('should execute before transaction execute');
-	});
-	describe('afterCommandExecute', () => {
-		it.todo('should execute after transaction execute');
-	});
-	describe('beforeTransactionsExecute', () => {
-		it.todo('should execute after genesis execute');
-	});
-	describe('afterTransactionsExecute', () => {
-		it.todo('should execute after genesis execute');
-	});
+    beforeEach(async () => {
+        genesisConfig = {};
+        moduleConfig = defaultConfig;
+        cloakModule = new CloakModule();
+        await cloakModule.init({ genesisConfig, moduleConfig });
+        endpointConfig = cloakModule.endpoint["_moduleConfig"];
+    });
+
+    describe("init", () => {
+        it("should initialize config with default value when module config is empty", async () => {
+            await expect(cloakModule.init({ genesisConfig, moduleConfig: {} })).resolves.toEqual(undefined);
+            endpointConfig = cloakModule.endpoint["_moduleConfig"];
+            expect(endpointConfig.swapInitializationFee.toString()).toEqual(defaultConfig.swapInitializationFee);
+        });
+
+        it("should set the swapInitializationFee property", async () => {
+            expect(endpointConfig.swapInitializationFee.toString()).toEqual(defaultConfig.swapInitializationFee);
+        });
+
+        it("should call method and endpoint init", async () => {
+            cloakModule = new CloakModule();
+            // Spy on init functions
+            jest.spyOn(cloakModule.endpoint, "init");
+            await cloakModule.init({ genesisConfig, moduleConfig });
+
+            expect(cloakModule.endpoint.init).toHaveBeenCalled();
+        });
+    });
 });
