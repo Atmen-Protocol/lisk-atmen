@@ -3,6 +3,7 @@ import { TOKEN_ID_LENGTH, ADDRESS_LENGTH, UINT256_LENGTH, SWAP_ID_LENGTH } from 
 export const swapSchema = {
     $id: "/atmen/swap",
     type: "object",
+    required: ["tokenID", "value", "senderAddress", "recipientAddress", "timelock", "tip"],
     properties: {
         tokenID: {
             dataType: "bytes",
@@ -31,14 +32,17 @@ export const swapSchema = {
             dataType: "uint32",
             fieldNumber: 5,
         },
+        tip: {
+            dataType: "uint64",
+            fieldNumber: 6,
+        },
     },
-    required: ["tokenID", "value", "senderAddress", "recipientAddress", "timelock"],
 };
 
 export const openSwapParamsSchema = {
     $id: "/atmen/openSwapParams",
     type: "object",
-    required: ["swapID", "tokenID", "value", "recipientAddress", "timelock"],
+    required: ["swapID", "tokenID", "value", "recipientAddress", "timelock", "tip"],
     properties: {
         swapID: {
             dataType: "bytes",
@@ -68,13 +72,17 @@ export const openSwapParamsSchema = {
             minimum: 1,
             fieldNumber: 5,
         },
+        tip: {
+            dataType: "uint64",
+            fieldNumber: 6,
+        },
     },
 };
 
 export const closeSwapParamsSchema = {
     $id: "/atmen/closeSwapParams",
     type: "object",
-    required: ["swapID", "secretKey"],
+    required: ["swapID", "secret"],
     properties: {
         swapID: {
             dataType: "bytes",
@@ -82,7 +90,7 @@ export const closeSwapParamsSchema = {
             maxLength: SWAP_ID_LENGTH,
             fieldNumber: 1,
         },
-        secretKey: {
+        secret: {
             dataType: "bytes",
             minLength: UINT256_LENGTH,
             maxLength: UINT256_LENGTH,
@@ -111,18 +119,18 @@ export const swapEventSchema = {
         ...swapSchema.properties,
         swapID: {
             dataType: "bytes",
-            fieldNumber: 6,
+            fieldNumber: 7,
             minLength: SWAP_ID_LENGTH,
             maxLength: SWAP_ID_LENGTH,
         },
-        secretKey: {
+        secret: {
             dataType: "bytes",
-            fieldNumber: 7,
+            fieldNumber: 8,
             minLength: UINT256_LENGTH,
             maxLength: UINT256_LENGTH,
         },
     },
-    required: [...swapSchema.required, "swapID", "secretKey"],
+    required: [...swapSchema.required, "swapID", "secret"],
 };
 
 export const getSwapRequestSchema = {
@@ -160,4 +168,62 @@ export const configSchema = {
             format: "uint64",
         },
     },
+};
+
+export const commitmentFromPointSchema = {
+    $id: "/atmen/endpoint/commitmentFromPointSchema",
+    type: "object",
+    properties: {
+        x: {
+            type: "string",
+            format: "hex",
+        },
+        y: {
+            type: "string",
+            format: "hex",
+        },
+    },
+    required: ["x", "y"],
+};
+export const commitmentFromSecretSchema = {
+    $id: "/atmen/endpoint/commitmentFromSecretSchema",
+    type: "object",
+    properties: {
+        secret: {
+            type: "string",
+            format: "hex",
+        },
+    },
+    required: ["secret"],
+};
+export const commitmentFromSharedSecretSchema = {
+    $id: "/atmen/endpoint/commitmentFromSharedSecretSchema",
+    type: "object",
+    properties: {
+        x: {
+            type: "string",
+            format: "hex",
+        },
+        y: {
+            type: "string",
+            format: "hex",
+        },
+        secret: {
+            type: "string",
+            format: "hex",
+        },
+    },
+    required: ["x", "y", "secret"],
+};
+
+export const commitmentSchema = {
+    $id: "/atmen/endpoint/commitmentSchema",
+    type: "object",
+    properties: {
+        commitment: {
+            type: "string",
+            format: "hex",
+        },
+    },
+    required: ["commitment"],
 };

@@ -30,7 +30,16 @@ import { InternalMethod } from "./internal_method";
 import { OpenSwapCommand } from "./commands/openSwap";
 import { CloseSwapCommand } from "./commands/closeSwap";
 import { RedeemSwapCommand } from "./commands/redeemSwap";
-import { getSwapRequestSchema, swapSchema, getInitializationFeesResponseSchema, configSchema } from "./schemas";
+import {
+    getSwapRequestSchema,
+    swapSchema,
+    getInitializationFeesResponseSchema,
+    configSchema,
+    commitmentFromSecretSchema,
+    commitmentFromPointSchema,
+    commitmentFromSharedSecretSchema,
+    commitmentSchema,
+} from "./schemas";
 
 export class AtmenModule extends BaseModule {
     public endpoint = new AtmenEndpoint(this.stores, this.offchainStores);
@@ -55,6 +64,8 @@ export class AtmenModule extends BaseModule {
     public addDependencies(tokenMethod: TokenMethod, feeMethod: FeeMethod) {
         this._internalMethod.addDependencies(tokenMethod, feeMethod);
         this._openSwapCommand.addDependencies(tokenMethod);
+        this.method.addDependencies(this._internalMethod);
+        this.endpoint.addDependencies(this._internalMethod);
     }
 
     public metadata(): ModuleMetadata {
@@ -65,6 +76,21 @@ export class AtmenModule extends BaseModule {
                     name: this.endpoint.getSwap.name,
                     request: getSwapRequestSchema,
                     response: swapSchema,
+                },
+                {
+                    name: this.endpoint.commitmentFromPoint.name,
+                    request: commitmentFromPointSchema,
+                    response: commitmentSchema,
+                },
+                {
+                    name: this.endpoint.commitmentFromSecret.name,
+                    request: commitmentFromSecretSchema,
+                    response: commitmentSchema,
+                },
+                {
+                    name: this.endpoint.commitmentFromSharedSecret.name,
+                    request: commitmentFromSharedSecretSchema,
+                    response: commitmentSchema,
                 },
 
                 {

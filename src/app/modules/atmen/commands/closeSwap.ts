@@ -6,7 +6,7 @@ import { InternalMethod } from "../internal_method";
 
 interface Params {
     swapID: Buffer;
-    secretKey: Buffer;
+    secret: Buffer;
 }
 
 export class CloseSwapCommand extends BaseCommand {
@@ -33,7 +33,7 @@ export class CloseSwapCommand extends BaseCommand {
         if (swap.timelock <= context.header.timestamp) {
             throw new Error("Timelock value must be in the future.");
         }
-        const commitID = this._internalMethod.commitmentFromSecret(params.secretKey);
+        const commitID = this._internalMethod.commitmentFromSecret(params.secret);
         if (!commitID.equals(params.swapID)) {
             throw new Error("Commitment verification failed.");
         }
@@ -44,7 +44,7 @@ export class CloseSwapCommand extends BaseCommand {
     }
 
     public async execute(context: CommandExecuteContext<Params>): Promise<void> {
-        const { params } = context;
-        this._internalMethod._closeSwap(context.getMethodContext(), params.swapID, params.secretKey);
+        const { transaction, params } = context;
+        this._internalMethod._closeSwap(context.getMethodContext(), transaction.senderAddress, params.swapID, params.secret);
     }
 }

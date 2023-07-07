@@ -64,6 +64,7 @@ describe("Open swap command", () => {
                     value: BigInt(100000000),
                     recipientAddress: utils.getRandomBytes(20),
                     timelock: 32000,
+                    tip: BigInt(0),
                 })
             ).toThrow("Lisk validator found 1 error[s]:\nProperty '.swapID' minLength not satisfied");
         });
@@ -76,6 +77,7 @@ describe("Open swap command", () => {
                     value: BigInt(100000000),
                     recipientAddress: utils.getRandomBytes(20),
                     timelock: 32000,
+                    tip: BigInt(100),
                 })
             ).toThrow("Lisk validator found 1 error[s]:\nProperty '.tokenID' maxLength exceeded");
         });
@@ -88,6 +90,7 @@ describe("Open swap command", () => {
                     value: BigInt(100000000),
                     recipientAddress: utils.getRandomBytes(19),
                     timelock: 32000,
+                    tip: BigInt(0),
                 })
             ).toThrow("Lisk validator found 1 error[s]:\nProperty '.recipientAddress' minLength not satisfied");
         });
@@ -101,6 +104,7 @@ describe("Open swap command", () => {
                 value: BigInt(100000000),
                 recipientAddress: utils.getRandomBytes(20),
                 timelock: Math.floor(Date.now() / 1000) + 1000,
+                tip: BigInt(0),
             };
             const context = testing.createTransactionContext({
                 transaction: new Transaction({
@@ -126,6 +130,7 @@ describe("Open swap command", () => {
                 value: BigInt(100000000),
                 recipientAddress: utils.getRandomBytes(20),
                 timelock: Math.floor(Date.now() / 1000) + 1000,
+                tip: BigInt(0),
             };
             const availableBalance = params.value - BigInt(1);
             jest.spyOn(tokenMethod, "getAvailableBalance").mockResolvedValue(availableBalance);
@@ -155,6 +160,7 @@ describe("Open swap command", () => {
                 value: BigInt(100000000),
                 recipientAddress: utils.getRandomBytes(20),
                 timelock: Math.floor(Date.now() / 1000) + 1000,
+                tip: BigInt(1),
             };
             const swapStore = cloakModule.stores.get(SwapStore);
             const context = testing.createTransactionContext({
@@ -169,6 +175,8 @@ describe("Open swap command", () => {
                 }),
             });
 
+            // console.log(context.transaction, params, openSwapParamsSchema);
+
             await command.execute(context.createCommandExecuteContext(openSwapParamsSchema));
             const swap = await swapStore.get(context.stateStore, params.swapID);
 
@@ -177,6 +185,7 @@ describe("Open swap command", () => {
             expect(swap.recipientAddress).toEqual(params.recipientAddress);
             expect(swap.tokenID).toEqual(params.tokenID);
             expect(swap.senderAddress).toEqual(context.transaction.senderAddress);
+            expect(swap.tip).toEqual(params.tip);
         });
     });
 });

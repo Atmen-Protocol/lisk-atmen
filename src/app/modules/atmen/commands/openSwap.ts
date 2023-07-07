@@ -3,7 +3,8 @@ import { BaseCommand, CommandExecuteContext, CommandVerifyContext, VerificationR
 import { openSwapParamsSchema } from "../schemas";
 import { SwapStore } from "../stores/swap";
 import { InternalMethod } from "../internal_method";
-import { TokenID, Swap, TokenMethod } from "../types";
+import { TokenID, Swap } from "../types";
+import { TokenMethod } from "lisk-sdk";
 
 interface Params {
     swapID: Buffer;
@@ -11,6 +12,7 @@ interface Params {
     value: bigint;
     recipientAddress: Buffer;
     timelock: number;
+    tip: bigint;
 }
 
 export class OpenSwapCommand extends BaseCommand {
@@ -33,6 +35,10 @@ export class OpenSwapCommand extends BaseCommand {
         const availableBalance = await this._tokenMethod.getAvailableBalance(context.getMethodContext(), context.transaction.senderAddress, params.tokenID);
         if (availableBalance < params.value) {
             throw new Error(`Insufficient balance ${availableBalance} for token ${params.tokenID.toString("hex")}.`);
+        }
+
+        if (params.tip >= params.value) {
+            throw new Error("Tip must be less than value.");
         }
 
         const swapStore = this.stores.get(SwapStore);
@@ -62,6 +68,7 @@ export class OpenSwapCommand extends BaseCommand {
             value: params.value,
             senderAddress: context.transaction.senderAddress,
             recipientAddress: params.recipientAddress,
+            tip: params.tip,
         } as Swap;
 
         await this._internalMethod._openSwap(context.getMethodContext(), params.swapID, swap);
